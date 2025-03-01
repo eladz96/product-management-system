@@ -2,10 +2,10 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const sequelize = require('./src/config/database');
-const authRoutes = require('./src/routes/authRoutes');
-const productRoutes = require('./src/routes/productRoutes');
-const { handleResponse } = require('./src/utils/responseUtil');
+const sequelize = require('./config/database');
+const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoutes');
+const { handleResponse } = require('./utils/responseUtil');
 
 dotenv.config();
 
