@@ -78,3 +78,44 @@ exports.deleteProduct = async (req, res) => {
         return handleResponse(res, 500, 'Error deleting product', error);
     }
 };
+
+// Search products in Elasticsearch
+exports.searchProducts = async (req, res) => {
+    try {
+        const { query, minPrice, maxPrice, userId } = req.query;
+
+        let esQuery = {
+            index: 'products',
+            body: {
+                query: {
+                    bool: {
+                        must: query ? [{ multi_match: { query, fields: ['name', 'description'] } }] : [],
+                        filter: []
+                    }
+                }
+            }
+        };
+
+        if (minPrice || maxPrice) {
+            esQuery.body.query.bool.filter.push({
+                range: {
+                    price: {
+                        gte: minPrice || 0,
+                        lte: maxPrice || 9999999
+                    }
+                }
+            });
+        }
+
+        if (userId) {
+            esQuery.body.query.bool.filter.push({ term: { userId } });
+        }
+
+        const esResponse = await esClient.search(esQuery);
+        const products = esResponse.hits.hits.map(hit => hit._source);
+
+        return handleResponse(res, 200, 'Search results', products);
+    } catch (error) {
+        return handleResponse(res, 500, 'Error searching products', error);
+    }
+};
